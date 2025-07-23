@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'https://mondayserver.onrender.com'; // Update if deploying somewhere else
+const BASE_URL = 'https://mondayserver.onrender.com'; // Change this for local testing
 
 function App() {
   const [apiKey, setApiKey] = useState('');
@@ -9,13 +9,13 @@ function App() {
   const [synced, setSynced] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [accessToken, setAccessToken] = useState('');
-  const [phone, setPhone] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
     if (code) {
+      console.log('🔁 Found code. Exchanging...');
       axios
         .get(`${BASE_URL}/oauth/callback?code=${code}`)
         .then((res) => {
@@ -23,6 +23,7 @@ function App() {
           if (access_token) {
             localStorage.setItem('monday_access_token', access_token);
             setAccessToken(access_token);
+            console.log('✅ Access token saved');
             window.history.replaceState({}, '', window.location.pathname);
           }
         })
@@ -33,7 +34,7 @@ function App() {
     }
 
     const savedKey = localStorage.getItem('sensibot_api_key');
-    if (savedKey) setStatus(200);
+    if (savedKey) console.log('📦 Sensibot key found');
 
     const token = localStorage.getItem('monday_access_token');
     if (token) setAccessToken(token);
@@ -47,10 +48,10 @@ function App() {
 
       if (response.status === 200) {
         localStorage.setItem('sensibot_api_key', apiKey);
-        alert('✅ API Key verified!');
+        alert('✅ Sensibot Key verified!');
         setStatus(200);
       } else {
-        alert('❌ Invalid API key.');
+        alert('❌ Invalid Sensibot API key.');
         setStatus(400);
       }
 
@@ -58,7 +59,7 @@ function App() {
     } catch (err) {
       console.error('❌ Sensibot Verify error:', err);
       setStatus(500);
-      alert('⚠️ API verification failed');
+      alert('⚠️ Sensibot verification failed');
     }
   };
 
@@ -66,25 +67,15 @@ function App() {
     if (syncing) return;
 
     const monday_token = localStorage.getItem('monday_access_token');
-    const sensibot_token = localStorage.getItem('sensibot_api_key');
-
-    if (!monday_token || !sensibot_token || !phone) {
-      return alert('Please connect Monday and enter phone number.');
-    }
+    if (!monday_token) return alert('Missing Monday access token');
 
     setSyncing(true);
     try {
-      const res = await axios.post(
-        `${BASE_URL}/fetch-chats`,
-        { to_no: phone },
-        {
-          headers: {
-            Authorization: monday_token,
-          },
-        }
-      );
+      const res = await axios.post(`${BASE_URL}/fetch-chats`, {}, {
+        headers: { Authorization: monday_token },
+      });
 
-      alert(res.data.message || '✅ Chats synced!');
+      alert(res.data.message || '✅ Synced!');
       setSynced(true);
     } catch (err) {
       console.error('❌ Sync error:', err.response?.data || err.message);
@@ -122,7 +113,7 @@ function App() {
         }}
       >
         <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '24px', color: '#2a2a2a' }}>
-          🤖 Sensibot + Monday CRM
+          🤖 Sensibot + Monday Integration
         </h1>
 
         <input
@@ -136,7 +127,8 @@ function App() {
             fontSize: '16px',
             borderRadius: '10px',
             border: '1px solid #ccc',
-            marginBottom: '16px',
+            marginBottom: '20px',
+            outline: 'none',
           }}
         />
 
@@ -152,52 +144,35 @@ function App() {
             border: 'none',
             borderRadius: '10px',
             cursor: 'pointer',
-            marginBottom: '24px',
+            marginBottom: '20px',
           }}
         >
           Verify API Key
         </button>
 
         {isReady && (
-          <>
-            <input
-              type="text"
-              placeholder="Enter customer phone number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '14px 18px',
-                fontSize: '16px',
-                borderRadius: '10px',
-                border: '1px solid #ccc',
-                marginBottom: '16px',
-              }}
-            />
-
-            <button
-              onClick={handleStartSync}
-              disabled={syncing}
-              style={{
-                width: '100%',
-                padding: '14px',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: 'white',
-                background: syncing
-                  ? '#CBD5E0'
-                  : synced
-                  ? 'linear-gradient(135deg, #2F855A 0%, #38A169 100%)'
-                  : 'linear-gradient(135deg, #38a169 0%, #48bb78 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                cursor: syncing ? 'not-allowed' : 'pointer',
-                marginBottom: '16px',
-              }}
-            >
-              {syncing ? '🔄 Syncing Chats...' : synced ? '✅ Synced' : '💬 Sync Chats'}
-            </button>
-          </>
+          <button
+            onClick={handleStartSync}
+            disabled={syncing}
+            style={{
+              width: '100%',
+              padding: '14px',
+              fontSize: '16px',
+              fontWeight: '600',
+              color: 'white',
+              background: syncing
+                ? '#CBD5E0'
+                : synced
+                ? 'linear-gradient(135deg, #2F855A 0%, #38A169 100%)'
+                : 'linear-gradient(135deg, #38a169 0%, #48bb78 100%)',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: syncing ? 'not-allowed' : 'pointer',
+              marginBottom: '16px',
+            }}
+          >
+            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '💬 Sync Sensibot Chats'}
+          </button>
         )}
 
         <div style={{ fontSize: '14px', fontWeight: '500' }}>
