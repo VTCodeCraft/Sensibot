@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'https://mondayserver.onrender.com'; // Change this for local testing
+const BASE_URL = 'https://sensibot-mcah.onrender.com'; // Change this for local testing
 
 function App() {
   const [apiKey, setApiKey] = useState('');
