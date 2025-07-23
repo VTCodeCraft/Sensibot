@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'https://mondayserver.onrender.com'; // Change this for local testing
+const BASE_URL = 'https://sensibot-mcah.onrender.com'; // Change this for local testing
 
 function App() {
   const [apiKey, setApiKey] = useState('');
@@ -34,14 +34,14 @@ function App() {
     }
 
     const savedKey = localStorage.getItem('sensibot_api_key');
-    if (savedKey) console.log('📦 Sensibot key found');
+    if (savedKey) console.log('📦 sensibot key found');
 
     const token = localStorage.getItem('monday_access_token');
     if (token) setAccessToken(token);
   }, []);
 
   const handleVerifyKey = async () => {
-    if (!apiKey) return alert('Please enter your Sensibot API key.');
+    if (!apiKey) return alert('Please enter your sensibot API key.');
 
     try {
       const response = await axios.post(`${BASE_URL}/api/verify-token`, { token: apiKey });
@@ -71,7 +71,7 @@ function App() {
 
     setSyncing(true);
     try {
-      const res = await axios.post(`${BASE_URL}/fetch-chats`, {}, {
+      const res = await axios.post(`${BASE_URL}/fetch-logs`, {}, {
         headers: { Authorization: monday_token },
       });
 
@@ -87,7 +87,7 @@ function App() {
   };
 
   const isReady =
-    localStorage.getItem('sensibot_api_key') && localStorage.getItem('monday_access_token');
+    localStorage.getItem('Sensibot_api_key') && localStorage.getItem('monday_access_token');
 
   return (
     <div
@@ -113,7 +113,7 @@ function App() {
         }}
       >
         <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '24px', color: '#2a2a2a' }}>
-          🤖 Sensibot + Monday Integration
+          🔐 Sensibot + Monday Integration
         </h1>
 
         <input
@@ -171,7 +171,7 @@ function App() {
               marginBottom: '16px',
             }}
           >
-            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '💬 Sync Sensibot Chats'}
+            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '📞 Start Call Log Sync'}
           </button>
         )}
 
