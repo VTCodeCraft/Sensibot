@@ -17,7 +17,7 @@ function App() {
     if (code) {
       console.log('🔁 Found code. Exchanging...');
       axios
-        .get(`${BASE_URL}/oauth/callback?code=${code}`)
+        .get(`${BASE_URL}/sensibot/oauth/callback?code=${code}`)
         .then((res) => {
           const { access_token } = res.data;
           if (access_token) {
@@ -171,7 +171,7 @@ function App() {
               marginBottom: '16px',
             }}
           >
-            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '📞 Start Call Log Sync'}
+            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : ' Start Chat Log Sync'}
           </button>
         )}
 

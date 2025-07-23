@@ -329,7 +329,7 @@ app.post('/api/verify-token', async (req, res) => {
 });
 
 // ✅ OAuth Callback
-app.get('/oauth/callback', async (req, res) => {
+app.get('/sensibot/oauth/callback', async (req, res) => {
   const code = req.query.code;
   const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
 
