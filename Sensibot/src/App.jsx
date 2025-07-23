@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'https://sensibot-mcah.onrender.com'; // Change this for local testing
+const BASE_URL = 'https://sensibot-mcah.onrender.com';
 
 function App() {
   const [apiKey, setApiKey] = useState('');
@@ -9,6 +9,7 @@ function App() {
   const [synced, setSynced] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [accessToken, setAccessToken] = useState('');
+  const [leadToggle, setLeadToggle] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -34,7 +35,9 @@ function App() {
     }
 
     const savedKey = localStorage.getItem('Sensibot_api_key');
-    if (savedKey) console.log('📦 Sensibot key found');
+    if (savedKey) {
+      console.log('📦 Sensibot key found');
+    }
 
     const token = localStorage.getItem('monday_access_token');
     if (token) setAccessToken(token);
@@ -64,25 +67,48 @@ function App() {
   };
 
   const handleStartSync = async () => {
-    if (syncing) return;
+  if (syncing) return;
 
-    const monday_token = localStorage.getItem('monday_access_token');
-    if (!monday_token) return alert('Missing Monday access token');
+  const monday_token = localStorage.getItem('monday_access_token');
+  if (!monday_token) return alert('Missing Monday access token');
 
-    setSyncing(true);
-    try {
-      const res = await axios.post(`${BASE_URL}/fetch-chats`, {}, {
+  setSyncing(true);
+  try {
+    const res = await axios.post(
+      `${BASE_URL}/fetch-chats`,
+      { autoCreate: leadToggle }, // <-- send autoCreate based on toggle
+      {
         headers: { Authorization: monday_token },
-      });
+      }
+    );
 
-      alert(res.data.message || '✅ Synced!');
-      setSynced(true);
+    alert(res.data.message || '✅ Synced!');
+    setSynced(true);
+  } catch (err) {
+    console.error('❌ Sync error:', err.response?.data || err.message);
+    alert('❌ Sync failed.');
+    setSynced(false);
+  } finally {
+    setSyncing(false);
+  }
+};
+  const handleLeadToggle = async (checked) => {
+    setLeadToggle(checked);
+    try {
+      const SensibotToken = localStorage.getItem('Sensibot_api_key');
+      await axios.post(
+        `${BASE_URL}/api/toggle-lead-setting`,
+        { enable: checked },
+        {
+          headers: {
+            Authorization: SensibotToken,
+          },
+        }
+      );
+      console.log('✅ Lead toggle updated');
     } catch (err) {
-      console.error('❌ Sync error:', err.response?.data || err.message);
-      alert('❌ Sync failed.');
-      setSynced(false);
-    } finally {
-      setSyncing(false);
+      console.error('⚠️ Failed to toggle setting', err);
+      alert('⚠️ Failed to save lead creation setting');
     }
   };
 
@@ -151,28 +177,44 @@ function App() {
         </button>
 
         {isReady && (
-          <button
-            onClick={handleStartSync}
-            disabled={syncing}
-            style={{
-              width: '100%',
-              padding: '14px',
-              fontSize: '16px',
-              fontWeight: '600',
-              color: 'white',
-              background: syncing
-                ? '#CBD5E0'
-                : synced
-                ? 'linear-gradient(135deg, #2F855A 0%, #38A169 100%)'
-                : 'linear-gradient(135deg, #38a169 0%, #48bb78 100%)',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: syncing ? 'not-allowed' : 'pointer',
-              marginBottom: '16px',
-            }}
-          >
-            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '📞 Start Call Log Sync'}
-          </button>
+          <>
+            <button
+              onClick={handleStartSync}
+              disabled={syncing}
+              style={{
+                width: '100%',
+                padding: '14px',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: 'white',
+                background: syncing
+                  ? '#CBD5E0'
+                  : synced
+                  ? 'linear-gradient(135deg, #2F855A 0%, #38A169 100%)'
+                  : 'linear-gradient(135deg, #38a169 0%, #48bb78 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                cursor: syncing ? 'not-allowed' : 'pointer',
+                marginBottom: '16px',
+              }}
+            >
+              {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '📞 Start Call Log Sync'}
+            </button>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '15px', display: 'block', marginBottom: '8px' }}>
+                🔁 Auto-Create Lead if Phone Not Found:
+              </label>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="checkbox"
+                  checked={leadToggle}
+                  onChange={(e) => handleLeadToggle(e.target.checked)}
+                />
+                <span>{leadToggle ? 'Enabled' : 'Disabled'}</span>
+              </label>
+            </div>
+          </>
         )}
 
         <div style={{ fontSize: '14px', fontWeight: '500' }}>
