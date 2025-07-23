@@ -71,7 +71,7 @@ function App() {
 
     setSyncing(true);
     try {
-      const res = await axios.post(`${BASE_URL}/fetch-logs`, {}, {
+      const res = await axios.post(`${BASE_URL}/fetch-chats`, {}, {
         headers: { Authorization: monday_token },
       });
 
