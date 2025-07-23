@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'https://sensibot-mcah.onrender.com'; // Change this for local testing
+const BASE_URL = 'https://mondayserver.onrender.com'; // Change this for local testing
 
 function App() {
   const [apiKey, setApiKey] = useState('');
@@ -17,7 +17,7 @@ function App() {
     if (code) {
       console.log('🔁 Found code. Exchanging...');
       axios
-        .get(`${BASE_URL}/sensibot/oauth/callback?code=${code}`)
+        .get(`${BASE_URL}/oauth/callback?code=${code}`)
         .then((res) => {
           const { access_token } = res.data;
           if (access_token) {
@@ -33,21 +33,21 @@ function App() {
         });
     }
 
-    const savedKey = localStorage.getItem('sensibot_api_key');
-    if (savedKey) console.log('📦 sensibot key found');
+    const savedKey = localStorage.getItem('Sensibot_api_key');
+    if (savedKey) console.log('📦 Sensibot key found');
 
     const token = localStorage.getItem('monday_access_token');
     if (token) setAccessToken(token);
   }, []);
 
   const handleVerifyKey = async () => {
-    if (!apiKey) return alert('Please enter your sensibot API key.');
+    if (!apiKey) return alert('Please enter your Sensibot API key.');
 
     try {
       const response = await axios.post(`${BASE_URL}/api/verify-token`, { token: apiKey });
 
       if (response.status === 200) {
-        localStorage.setItem('sensibot_api_key', apiKey);
+        localStorage.setItem('Sensibot_api_key', apiKey);
         alert('✅ Sensibot Key verified!');
         setStatus(200);
       } else {
@@ -171,7 +171,7 @@ function App() {
               marginBottom: '16px',
             }}
           >
-            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : ' Start Chat Log Sync'}
+            {syncing ? '🔄 Syncing...' : synced ? '✅ Synced' : '📞 Start Call Log Sync'}
           </button>
         )}
 
